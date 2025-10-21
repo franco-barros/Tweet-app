@@ -9,30 +9,32 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  username      String     @unique
-  email         String     @unique
-  password      String
-  name          String?
-  bio           String?
-  avatarUrl     String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  name      String?
+  bio       String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  tweets        Tweet[]
-  likes         Like[]
-  followers     Follow[]   @relation("followers")
-  following     Follow[]   @relation("following")
+  tweets    Tweet[]
+  likes     Like[]
+  followers Follow[] @relation("UserFollowers")
+  following Follow[] @relation("UserFollowing")
 }
 
 model Tweet {
-  id          String     @id @default(cuid())
-  content     String
-  imageUrl    String?
-  createdAt   DateTime   @default(now())
-  authorId    String
-  author      User       @relation(fields: [authorId], references: [id])
-  likes       Like[]
+  id        String   @id @default(cuid())
+  content   String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  String
+
+  author User   @relation(fields: [authorId], references: [id])
+  likes  Like[]
 }
 
 model Like {
@@ -41,10 +43,10 @@ model Like {
   tweetId   String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  tweet     Tweet    @relation(fields: [tweetId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+  tweet Tweet @relation(fields: [tweetId], references: [id])
 
-  @@unique([userId, tweetId]) 
+  @@unique([userId, tweetId])
 }
 
 model Follow {
@@ -53,8 +55,8 @@ model Follow {
   followingId String
   createdAt   DateTime @default(now())
 
-  follower    User     @relation("followers", fields: [followerId], references: [id])
-  following   User     @relation("following", fields: [followingId], references: [id])
+  follower  User @relation("UserFollowers", fields: [followerId], references: [id])
+  following User @relation("UserFollowing", fields: [followingId], references: [id])
 
-  @@unique([followerId, followingId]) 
+  @@unique([followerId, followingId])
 }

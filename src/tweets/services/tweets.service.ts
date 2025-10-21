@@ -1,36 +1,37 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Tweet } from '../entities/tweet.entity';
 import { CreateTweetDto } from '../dto/create-tweet.dto';
 import { UpdateTweetDto } from '../dto/update-tweet.dto';
+import { TweetEntity } from '../entities/tweet.entity';
+import { ITweet } from '../../interfaces/tweet.interface';
 
-const tweetsDB: Tweet[] = [];
+// Base de datos temporal en memoria
+const tweetsDB: TweetEntity[] = [];
 
 @Injectable()
 export class TweetsService {
-  async create(data: CreateTweetDto): Promise<Tweet> {
-    const newTweet: Tweet = {
+  async create(data: CreateTweetDto): Promise<ITweet> {
+    const newTweet = new TweetEntity({
       id: Date.now(),
-      content: data.content,
-      authorId: data.authorId,
-      createdAt: new Date(),
-    };
+      ...data,
+    });
+
     tweetsDB.push(newTweet);
     return newTweet;
   }
 
-  async findAll(): Promise<Tweet[]> {
+  async findAll(): Promise<ITweet[]> {
     return tweetsDB;
   }
 
-  async findOne(id: number): Promise<Tweet> {
+  async findOne(id: number): Promise<ITweet> {
     const tweet = tweetsDB.find((t) => t.id === id);
     if (!tweet) throw new NotFoundException('Tweet no encontrado');
     return tweet;
   }
 
-  async update(id: number, data: UpdateTweetDto): Promise<Tweet> {
+  async update(id: number, data: UpdateTweetDto): Promise<ITweet> {
     const tweet = await this.findOne(id);
-    Object.assign(tweet, data);
+    Object.assign(tweet, data, { updatedAt: new Date() });
     return tweet;
   }
 
